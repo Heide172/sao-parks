@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
 	import 'leaflet-draw/dist/leaflet.draw.css';
@@ -9,6 +10,38 @@
 	import 'leaflet.markercluster';
 	import { FACILITY_TYPES, FACILITY_ICONS } from '$lib/constants';
 
+	type Geometry = { type: string; coordinates: number[][][] };
+
+	type District = {
+		id: number;
+		name: string;
+		geometry: Geometry;
+	};
+
+	type Park = {
+		id: number;
+		name: string;
+		districtId: number | null;
+		geometry: Geometry;
+		area?: number;
+		balanceHolder?: string;
+		description?: string;
+	};
+
+	type Facility = {
+		id: number;
+		name: string;
+		type: string;
+		latitude: number;
+		longitude: number;
+		parkId: number;
+		photo?: string;
+		description?: string;
+		contractAction?: string;
+		contractWith?: string;
+		contractTerm?: string;
+	};
+
 	let {
 		parks = $bindable([]),
 		facilities = $bindable([]),
@@ -16,27 +49,15 @@
 		isAdmin = false,
 		onDistrictCreate,
 		onParkCreate,
-		onFacilityCreate,
-		onDistrictEdit,
-		onParkEdit,
-		onFacilityEdit,
-		onDistrictDelete,
-		onParkDelete,
-		onFacilityDelete
+		onFacilityCreate
 	}: {
-		parks?: any[];
-		facilities?: any[];
-		districts?: any[];
+		parks?: Park[];
+		facilities?: Facility[];
+		districts?: District[];
 		isAdmin?: boolean;
-		onDistrictCreate?: (geometry: any) => void;
-		onParkCreate?: (geometry: any) => void;
+		onDistrictCreate?: (geometry: Geometry) => void;
+		onParkCreate?: (geometry: Geometry) => void;
 		onFacilityCreate?: (lat: number, lng: number) => void;
-		onDistrictEdit?: (district: any) => void;
-		onParkEdit?: (park: any) => void;
-		onFacilityEdit?: (facility: any) => void;
-		onDistrictDelete?: (districtId: number) => void;
-		onParkDelete?: (parkId: number) => void;
-		onFacilityDelete?: (facilityId: number) => void;
 	} = $props();
 
 	let mapContainer: HTMLDivElement;
@@ -45,7 +66,7 @@
 	let districtLayer: L.FeatureGroup;
 	let markerClusterGroup: L.MarkerClusterGroup;
 	let drawControl: L.Control.Draw;
-	let activeDrawHandler: any = null;
+	let activeDrawHandler: L.Draw.Polygon | null = null;
 
 	let isDrawingDistrict = $state(false);
 	let isDrawingPark = $state(false);
@@ -53,17 +74,17 @@
 
 	// Filter state
 	let showFilterPanel = $state(false);
-	let selectedDistricts = $state<Set<number>>(new Set());
-	let selectedParks = $state<Set<number>>(new Set());
-	let selectedFacilityTypes = $state<Set<string>>(new Set());
+	let selectedDistricts = new SvelteSet<number>();
+	let selectedParks = new SvelteSet<number>();
+	let selectedFacilityTypes = new SvelteSet<string>();
 	let filtersInitialized = $state(false);
 
 	// Initialize all filters as selected only once
 	$effect(() => {
 		if (!filtersInitialized && districts.length > 0 && parks.length > 0) {
-			selectedDistricts = new Set(districts.map((d) => d.id));
-			selectedParks = new Set(parks.map((p) => p.id));
-			selectedFacilityTypes = new Set(Object.keys(FACILITY_TYPES));
+			selectedDistricts = new SvelteSet(districts.map((d) => d.id));
+			selectedParks = new SvelteSet(parks.map((p) => p.id));
+			selectedFacilityTypes = new SvelteSet(Object.keys(FACILITY_TYPES));
 			filtersInitialized = true;
 		}
 	});
@@ -141,7 +162,7 @@
 		map.addControl(drawControl);
 
 		// Handle polygon creation
-		map.on(L.Draw.Event.CREATED, (event: any) => {
+		map.on(L.Draw.Event.CREATED, (event: L.DrawEvents.Created) => {
 			const layer = event.layer;
 
 			if (event.layerType === 'polygon') {
@@ -382,10 +403,10 @@
 
 			// Remove any temporary drawing layers
 			try {
-				const layersToRemove: any[] = [];
+				const layersToRemove: L.Layer[] = [];
 
-				// @ts-ignore - access Leaflet's internal layer management
-				map.eachLayer((layer: any) => {
+				// @ts-expect-error - access Leaflet's internal layer management
+				map.eachLayer((layer: L.Layer) => {
 					// Skip tile layer, feature groups, and marker cluster
 					if (
 						layer === map._layers[Object.keys(map._layers)[0]] || // tile layer
@@ -407,7 +428,7 @@
 
 					// Remove polylines that are temporary drawing previews
 					if (layer instanceof L.Polyline || layer instanceof L.Polygon) {
-						// @ts-ignore - check for drawing class
+						// @ts-expect-error - check for drawing class
 						const classNames = layer.options?.className || '';
 						if (classNames.includes('leaflet-interactive')) {
 							layersToRemove.push(layer);
@@ -437,7 +458,7 @@
 				layersToRemove.forEach((layer) => {
 					try {
 						map.removeLayer(layer);
-					} catch (e) {
+					} catch {
 						// Layer might already be removed
 					}
 				});
@@ -479,41 +500,38 @@
 
 	// Filter helper functions
 	function toggleDistrict(id: number) {
-		const newSet = new Set(selectedDistricts);
-		if (newSet.has(id)) {
-			newSet.delete(id);
+		if (selectedDistricts.has(id)) {
+			selectedDistricts.delete(id);
 		} else {
-			newSet.add(id);
+			selectedDistricts.add(id);
 		}
-		selectedDistricts = newSet;
+		selectedDistricts = selectedDistricts;
 	}
 
 	function togglePark(id: number) {
-		const newSet = new Set(selectedParks);
-		if (newSet.has(id)) {
-			newSet.delete(id);
+		if (selectedParks.has(id)) {
+			selectedParks.delete(id);
 		} else {
-			newSet.add(id);
+			selectedParks.add(id);
 		}
-		selectedParks = newSet;
+		selectedParks = selectedParks;
 	}
 
 	function toggleFacilityType(type: string) {
-		const newSet = new Set(selectedFacilityTypes);
-		if (newSet.has(type)) {
-			newSet.delete(type);
+		if (selectedFacilityTypes.has(type)) {
+			selectedFacilityTypes.delete(type);
 		} else {
-			newSet.add(type);
+			selectedFacilityTypes.add(type);
 		}
-		selectedFacilityTypes = newSet;
+		selectedFacilityTypes = selectedFacilityTypes;
 	}
 
 	function selectAllDistricts() {
-		selectedDistricts = new Set(districts.map((d) => d.id));
+		selectedDistricts = new SvelteSet(districts.map((d) => d.id));
 	}
 
 	function deselectAllDistricts() {
-		selectedDistricts = new Set();
+		selectedDistricts = new SvelteSet();
 	}
 
 	function selectAllParks() {
@@ -521,7 +539,7 @@
 		const parksToSelect = parks.filter(
 			(park) => !park.districtId || selectedDistricts.has(park.districtId)
 		);
-		selectedParks = new Set(parksToSelect.map((p) => p.id));
+		selectedParks = new SvelteSet(parksToSelect.map((p) => p.id));
 	}
 
 	function deselectAllParks() {
@@ -529,15 +547,15 @@
 		const parksToKeep = parks.filter(
 			(park) => park.districtId && !selectedDistricts.has(park.districtId)
 		);
-		selectedParks = new Set(parksToKeep.map((p) => p.id));
+		selectedParks = new SvelteSet(parksToKeep.map((p) => p.id));
 	}
 
 	function selectAllFacilityTypes() {
-		selectedFacilityTypes = new Set(Object.keys(FACILITY_TYPES));
+		selectedFacilityTypes = new SvelteSet(Object.keys(FACILITY_TYPES));
 	}
 
 	function deselectAllFacilityTypes() {
-		selectedFacilityTypes = new Set();
+		selectedFacilityTypes = new SvelteSet();
 	}
 
 	// Reactive updates
@@ -602,7 +620,7 @@
 					</div>
 				</div>
 				<div class="filter-checkboxes">
-					{#each Object.entries(FACILITY_TYPES) as [type, label]}
+					{#each Object.entries(FACILITY_TYPES) as [type, label] (type)}
 						<label class="checkbox-label">
 							<input
 								type="checkbox"
@@ -626,7 +644,7 @@
 					</div>
 				</div>
 				<div class="filter-checkboxes">
-					{#each districts as district}
+					{#each districts as district (district.id)}
 						<label class="checkbox-label">
 							<input
 								type="checkbox"
@@ -649,7 +667,7 @@
 					</div>
 				</div>
 				<div class="filter-checkboxes">
-					{#each filteredParks as park}
+					{#each filteredParks as park (park.id)}
 						<label class="checkbox-label">
 							<input
 								type="checkbox"

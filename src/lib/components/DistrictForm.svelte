@@ -1,15 +1,21 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
 
+	type District = {
+		id: number;
+		name: string;
+		geometry: { type: string; coordinates: number[][][] };
+	};
+
 	let {
 		geometry,
 		district = null,
 		onSubmit,
 		onCancel
 	}: {
-		geometry: any;
-		district?: any;
-		onSubmit: (data: any) => void;
+		geometry: { type: string; coordinates: number[][][] };
+		district?: District | null;
+		onSubmit: (data: District) => void;
 		onCancel: () => void;
 	} = $props();
 
@@ -42,7 +48,7 @@
 		loading = true;
 
 		try {
-			const url = isEditMode ? `/api/districts/${district.id}` : '/api/districts';
+			const url = isEditMode ? `/api/districts/${district?.id}` : '/api/districts';
 			const method = isEditMode ? 'PUT' : 'POST';
 
 			const response = await fetch(url, {
@@ -77,7 +83,12 @@
 		<div class="error">{error}</div>
 	{/if}
 
-	<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			handleSubmit();
+		}}
+	>
 		<div class="form-group">
 			<label for="name">Название *</label>
 			<input
@@ -97,11 +108,15 @@
 		{/if}
 
 		<div class="button-group">
-			<button type="button" onclick={onCancel} disabled={loading}>
-				Отмена
-			</button>
+			<button type="button" onclick={onCancel} disabled={loading}> Отмена </button>
 			<button type="submit" disabled={loading}>
-				{loading ? (isEditMode ? 'Обновление...' : 'Создание...') : (isEditMode ? 'Обновить округ' : 'Создать округ')}
+				{loading
+					? isEditMode
+						? 'Обновление...'
+						: 'Создание...'
+					: isEditMode
+						? 'Обновить округ'
+						: 'Создать округ'}
 			</button>
 		</div>
 	</form>

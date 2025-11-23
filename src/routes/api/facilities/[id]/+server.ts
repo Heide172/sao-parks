@@ -14,10 +14,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			return json({ error: 'Invalid facility ID' }, { status: 400 });
 		}
 
-		const [facility] = await db
-			.select()
-			.from(facilities)
-			.where(eq(facilities.id, facilityId));
+		const [facility] = await db.select().from(facilities).where(eq(facilities.id, facilityId));
 
 		if (!facility) {
 			return json({ error: 'Facility not found' }, { status: 404 });
@@ -109,10 +106,7 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 		}
 
 		// Get facility to check for photo
-		const [facility] = await db
-			.select()
-			.from(facilities)
-			.where(eq(facilities.id, facilityId));
+		const [facility] = await db.select().from(facilities).where(eq(facilities.id, facilityId));
 
 		if (!facility) {
 			return json({ error: 'Facility not found' }, { status: 404 });

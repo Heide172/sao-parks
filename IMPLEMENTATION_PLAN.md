@@ -36,17 +36,20 @@ A web application for marking parks and facilities on an interactive map with ad
 ### Phase 1: Infrastructure Setup
 
 #### 1.1 Vercel Blob Storage Configuration
+
 - Install `@vercel/blob` package
 - Configure environment variables
 - Test blob storage connection
 
 #### 1.2 Authentication System
+
 - Set up simple session-based auth or Vercel Auth
 - Create admin credentials (single account)
 - Implement session middleware
 - No registration functionality needed
 
 #### 1.3 Map Libraries Installation
+
 - Install `leaflet` package
 - Install `leaflet.markercluster` package
 - Install type definitions
@@ -55,12 +58,14 @@ A web application for marking parks and facilities on an interactive map with ad
 ### Phase 2: Map Core Functionality
 
 #### 2.1 Main Map Component (`src/lib/components/Map.svelte`)
+
 - Initialize Leaflet map
 - Set up base tile layer (OpenStreetMap)
 - Configure map view and zoom levels
 - Handle Svelte 5 reactivity with map instance
 
 #### 2.2 Park Polygon Drawing
+
 - Integrate Leaflet.draw or custom polygon tool
 - Allow vertex placement for creating park boundaries
 - Enable polygon editing (move/add/remove vertices)
@@ -68,12 +73,14 @@ A web application for marking parks and facilities on an interactive map with ad
 - Visual feedback during drawing
 
 #### 2.3 Facility Marker Placement
+
 - Implement single-click point placement
 - Show marker preview
 - Capture latitude/longitude coordinates
 - Different marker icons based on facility type
 
 #### 2.4 Marker Clustering Integration
+
 - Configure Leaflet.markercluster
 - Set clustering radius and thresholds
 - Customize cluster icons
@@ -82,6 +89,7 @@ A web application for marking parks and facilities on an interactive map with ad
 ### Phase 3: Data Management UI
 
 #### 3.1 Park Form Component (`src/lib/components/ParkForm.svelte`)
+
 - Fields: name, slug, description, area, district
 - Geometry captured from map polygon
 - Validation logic
@@ -89,6 +97,7 @@ A web application for marking parks and facilities on an interactive map with ad
 - Admin-only access
 
 #### 3.2 Facility Form Component (`src/lib/components/FacilityForm.svelte`)
+
 - Fields from schema:
   - name, type (enum dropdown)
   - latitude, longitude (from map click)
@@ -102,12 +111,14 @@ A web application for marking parks and facilities on an interactive map with ad
 - Admin-only access
 
 #### 3.3 Park Info Popup/Modal
+
 - Display park details on click
 - Show: name, description, area, district
 - Visual boundary highlight
 - Edit/Delete buttons (admin only)
 
 #### 3.4 Facility Info Popup/Modal
+
 - Display facility details on marker click
 - Show: name, type, photo, all metadata
 - Photo display
@@ -116,6 +127,7 @@ A web application for marking parks and facilities on an interactive map with ad
 ### Phase 4: API Layer
 
 #### 4.1 Park CRUD Endpoints
+
 ```
 POST   /api/parks          - Create park
 GET    /api/parks          - List all parks
@@ -125,6 +137,7 @@ DELETE /api/parks/[id]     - Delete park
 ```
 
 #### 4.2 Facility CRUD Endpoints
+
 ```
 POST   /api/facilities          - Create facility
 GET    /api/facilities          - List all facilities
@@ -134,15 +147,18 @@ DELETE /api/facilities/[id]     - Delete facility
 ```
 
 #### 4.3 Photo Upload Endpoint
+
 ```
 POST   /api/upload              - Upload photo to Vercel Blob
 ```
+
 - Accept multipart/form-data
 - Validate file type (images only)
 - Return blob URL
 - Handle errors gracefully
 
 #### 4.4 Authentication Endpoints
+
 ```
 POST   /api/auth/login          - Admin login
 POST   /api/auth/logout         - Admin logout
@@ -152,18 +168,21 @@ GET    /api/auth/session        - Check session status
 ### Phase 5: Security & Authorization
 
 #### 5.1 Admin Login Page (`src/routes/admin/login/+page.svelte`)
+
 - Simple username/password form
 - Session creation on successful login
 - Redirect to map on success
 - Error handling
 
 #### 5.2 Authorization Middleware
+
 - Server hooks to verify admin session
 - Protect all POST/PUT/DELETE endpoints
 - Return 401/403 for unauthorized requests
 - Allow GET requests for public viewing
 
 #### 5.3 Client-Side Auth Guards
+
 - Hide edit/delete UI for non-admin users
 - Show login button when not authenticated
 - Client-side route protection for admin pages
@@ -171,6 +190,7 @@ GET    /api/auth/session        - Check session status
 ### Phase 6: Testing & Deployment
 
 #### 6.1 Functionality Testing
+
 - Test park creation with polygons
 - Test facility creation with markers
 - Verify info display on clicks
@@ -179,12 +199,14 @@ GET    /api/auth/session        - Check session status
 - Test edit/delete operations
 
 #### 6.2 Performance Testing
+
 - Test with 100+ facility markers
 - Verify clustering works correctly
 - Check map responsiveness
 - Monitor load times
 
 #### 6.3 Vercel Deployment Configuration
+
 - Set environment variables:
   - `DATABASE_URL` (Neon)
   - `BLOB_READ_WRITE_TOKEN` (Vercel Blob)
@@ -197,6 +219,7 @@ GET    /api/auth/session        - Check session status
 ## Database Schema Reference
 
 ### Parks Table
+
 - `id`: serial primary key
 - `name`: text, required
 - `slug`: text, unique, required
@@ -207,6 +230,7 @@ GET    /api/auth/session        - Check session status
 - `createdAt`, `updatedAt`: timestamps
 
 ### Facilities Table
+
 - `id`: serial primary key
 - `externalId`: text, optional
 - `name`: text, required
@@ -224,6 +248,7 @@ GET    /api/auth/session        - Check session status
 - `createdAt`, `updatedAt`: timestamps
 
 ### Districts Table
+
 - `id`: serial primary key
 - `name`: text, unique, required
 - `slug`: text, unique, required
@@ -233,6 +258,7 @@ GET    /api/auth/session        - Check session status
 ## Technical Considerations
 
 ### Map Interaction Flow
+
 1. User clicks "Add Park" (admin only)
 2. Activate polygon drawing mode
 3. User places vertices by clicking map
@@ -242,6 +268,7 @@ GET    /api/auth/session        - Check session status
 7. Render polygon on map
 
 ### Facility Creation Flow
+
 1. User clicks "Add Facility" (admin only)
 2. Activate marker placement mode
 3. User clicks location on map
@@ -251,6 +278,7 @@ GET    /api/auth/session        - Check session status
 7. Add marker to cluster layer
 
 ### Authentication Strategy
+
 - Keep it simple: single admin account
 - Use SvelteKit hooks for server-side session validation
 - Store session in cookies (httpOnly, secure)
@@ -258,6 +286,7 @@ GET    /api/auth/session        - Check session status
 - Option: Use Vercel KV for session storage or simple encrypted cookie
 
 ### Performance Optimization
+
 - Marker clustering is essential
 - Load facilities in viewport only (optional future enhancement)
 - Lazy load facility photos

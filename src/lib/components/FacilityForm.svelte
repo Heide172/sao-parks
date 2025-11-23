@@ -1,6 +1,31 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
+	import { resolve } from '$app/paths';
 	import { FACILITY_TYPE_OPTIONS } from '$lib/constants';
+
+	type Park = {
+		id: number;
+		name: string;
+		districtId: number | null;
+		geometry: { type: string; coordinates: number[][][] };
+		area?: number;
+		balanceHolder?: string;
+		description?: string;
+	};
+
+	type Facility = {
+		id: number;
+		name: string;
+		type: string;
+		latitude: number;
+		longitude: number;
+		parkId: number;
+		photo?: string;
+		description?: string;
+		contractAction?: string;
+		contractWith?: string;
+		contractTerm?: string;
+	};
 
 	let {
 		latitude,
@@ -12,9 +37,9 @@
 	}: {
 		latitude: number;
 		longitude: number;
-		parks: any[];
-		facility?: any;
-		onSubmit: (data: any) => void;
+		parks: Park[];
+		facility?: Facility | null;
+		onSubmit: (data: Facility) => void;
 		onCancel: () => void;
 	} = $props();
 
@@ -64,7 +89,6 @@
 		}
 	});
 
-
 	async function handlePhotoUpload() {
 		if (!photoFile) return null;
 
@@ -105,7 +129,7 @@
 				photoUrl = await handlePhotoUpload();
 			}
 
-			const url = isEditMode ? `/api/facilities/${facility.id}` : '/api/facilities';
+			const url = isEditMode ? `/api/facilities/${facility?.id}` : '/api/facilities';
 			const method = isEditMode ? 'PUT' : 'POST';
 
 			const response = await fetch(url, {
@@ -167,23 +191,31 @@
 	>
 		<div class="form-group">
 			<label for="name">Название *</label>
-			<input type="text" id="name" bind:value={name} required placeholder="Введите название объекта" />
+			<input
+				type="text"
+				id="name"
+				bind:value={name}
+				required
+				placeholder="Введите название объекта"
+			/>
 		</div>
 
 		<div class="form-group">
 			<label for="type">Тип *</label>
 			<select id="type" bind:value={type} required>
-				{#each FACILITY_TYPE_OPTIONS as ft}
+				{#each FACILITY_TYPE_OPTIONS as ft (ft.value)}
 					<option value={ft.value}>{ft.label}</option>
 				{/each}
 			</select>
 		</div>
 
 		<div class="form-group">
-			<label for="parkId">Парк * {detectedPark && !isEditMode ? '(Определен автоматически)' : ''}</label>
+			<label for="parkId"
+				>Парк * {detectedPark && !isEditMode ? '(Определен автоматически)' : ''}</label
+			>
 			<select id="parkId" bind:value={parkId} required>
 				<option value="">Выберите парк</option>
-				{#each parks as park}
+				{#each parks as park (park.id)}
 					<option value={String(park.id)}>{park.name}</option>
 				{/each}
 			</select>
@@ -221,11 +253,7 @@
 
 		<div class="form-group">
 			<label for="description">Описание</label>
-			<textarea
-				id="description"
-				bind:value={description}
-				rows="4"
-				placeholder="Опишите объект..."
+			<textarea id="description" bind:value={description} rows="4" placeholder="Опишите объект..."
 			></textarea>
 		</div>
 
@@ -235,7 +263,11 @@
 			{#if photoFile}
 				<small>Выбрано: {photoFile.name}</small>
 			{:else if photoUrl}
-				<small>Текущее фото: <a href={photoUrl} target="_blank">Посмотреть</a></small>
+				<small
+					>Текущее фото: <a href={resolve(photoUrl)} target="_blank" rel="noopener noreferrer"
+						>Посмотреть</a
+					></small
+				>
 			{/if}
 		</div>
 

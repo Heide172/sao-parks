@@ -5,10 +5,7 @@ const SESSION_COOKIE_NAME = 'admin_session';
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export function verifyCredentials(username: string, password: string): boolean {
-	return (
-		username === env.ADMIN_USERNAME &&
-		password === env.ADMIN_PASSWORD
-	);
+	return username === env.ADMIN_USERNAME && password === env.ADMIN_PASSWORD;
 }
 
 export function createSession(cookies: Cookies): void {

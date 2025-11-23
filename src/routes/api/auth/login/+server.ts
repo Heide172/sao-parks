@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		return json({ error: 'Invalid credentials' }, { status: 401 });
-	} catch (error) {
+	} catch {
 		return json({ error: 'Invalid request' }, { status: 400 });
 	}
 };

@@ -1,6 +1,21 @@
 <script lang="ts">
 	import * as turf from '@turf/turf';
 
+	type District = {
+		id: number;
+		name: string;
+	};
+
+	type Park = {
+		id: number;
+		name: string;
+		districtId: number | null;
+		geometry: { type: string; coordinates: number[][][] };
+		area?: number;
+		balanceHolder?: string;
+		description?: string;
+	};
+
 	let {
 		geometry,
 		districts,
@@ -8,10 +23,10 @@
 		onSubmit,
 		onCancel
 	}: {
-		geometry: any;
-		districts: any[];
-		park?: any;
-		onSubmit: (data: any) => void;
+		geometry: { type: string; coordinates: number[][][] };
+		districts: District[];
+		park?: Park | null;
+		onSubmit: (data: Park) => void;
 		onCancel: () => void;
 	} = $props();
 
@@ -52,7 +67,7 @@
 		loading = true;
 
 		try {
-			const url = isEditMode ? `/api/parks/${park.id}` : '/api/parks';
+			const url = isEditMode ? `/api/parks/${park?.id}` : '/api/parks';
 			const method = isEditMode ? 'PUT' : 'POST';
 
 			const response = await fetch(url, {
@@ -91,7 +106,12 @@
 		<div class="error">{error}</div>
 	{/if}
 
-	<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			handleSubmit();
+		}}
+	>
 		<div class="form-group">
 			<label for="name">Название *</label>
 			<input
@@ -107,7 +127,7 @@
 			<label for="districtId">Округ *</label>
 			<select id="districtId" bind:value={districtId} required>
 				<option value="">Выберите округ</option>
-				{#each districts as district}
+				{#each districts as district (district.id)}
 					<option value={district.id}>{district.name}</option>
 				{/each}
 			</select>
@@ -132,20 +152,20 @@
 
 		<div class="form-group">
 			<label for="description">Описание</label>
-			<textarea
-				id="description"
-				bind:value={description}
-				rows="4"
-				placeholder="Опишите парк..."
+			<textarea id="description" bind:value={description} rows="4" placeholder="Опишите парк..."
 			></textarea>
 		</div>
 
 		<div class="button-group">
-			<button type="button" onclick={onCancel} disabled={loading}>
-				Отмена
-			</button>
+			<button type="button" onclick={onCancel} disabled={loading}> Отмена </button>
 			<button type="submit" disabled={loading}>
-				{loading ? (isEditMode ? 'Обновление...' : 'Создание...') : (isEditMode ? 'Обновить парк' : 'Создать парк')}
+				{loading
+					? isEditMode
+						? 'Обновление...'
+						: 'Создание...'
+					: isEditMode
+						? 'Обновить парк'
+						: 'Создать парк'}
 			</button>
 		</div>
 	</form>

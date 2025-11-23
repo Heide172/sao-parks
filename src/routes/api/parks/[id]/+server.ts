@@ -80,10 +80,7 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 			return json({ error: 'Invalid park ID' }, { status: 400 });
 		}
 
-		const [deletedPark] = await db
-			.delete(parks)
-			.where(eq(parks.id, parkId))
-			.returning();
+		const [deletedPark] = await db.delete(parks).where(eq(parks.id, parkId)).returning();
 
 		if (!deletedPark) {
 			return json({ error: 'Park not found' }, { status: 404 });

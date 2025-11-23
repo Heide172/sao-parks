@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	let username = $state('');
 	let password = $state('');
@@ -20,11 +21,11 @@
 			const data = await response.json();
 
 			if (response.ok) {
-				goto('/');
+				void goto(resolve('/'));
 			} else {
 				error = data.error || 'Login failed';
 			}
-		} catch (err) {
+		} catch {
 			error = 'An error occurred. Please try again.';
 		} finally {
 			loading = false;
@@ -40,16 +41,15 @@
 			<div class="error">{error}</div>
 		{/if}
 
-		<form onsubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				handleLogin();
+			}}
+		>
 			<div class="form-group">
 				<label for="username">Username</label>
-				<input
-					type="text"
-					id="username"
-					bind:value={username}
-					required
-					autocomplete="username"
-				/>
+				<input type="text" id="username" bind:value={username} required autocomplete="username" />
 			</div>
 
 			<div class="form-group">

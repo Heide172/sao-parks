@@ -31,12 +31,14 @@ A web application for marking parks and facilities on an interactive map with ad
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <your-repo-url>
 cd sao-parks
 ```
 
 2. Install dependencies:
+
 ```bash
 bun install
 ```
@@ -50,6 +52,7 @@ cp .env.example .env
 ```
 
 Required environment variables:
+
 ```env
 # Database
 DATABASE_URL="your_neon_database_url"
@@ -64,16 +67,19 @@ ADMIN_PASSWORD="your_secure_password"
 ```
 
 To generate `AUTH_SECRET`, run:
+
 ```bash
 openssl rand -hex 32
 ```
 
 4. Push the database schema:
+
 ```bash
 bun run db:push
 ```
 
 5. Start the development server:
+
 ```bash
 bun run dev
 ```
@@ -166,11 +172,13 @@ src/
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/login` - Admin login
 - `POST /api/auth/logout` - Logout
 - `GET /api/auth/session` - Check session status
 
 ### Parks
+
 - `GET /api/parks` - List all parks
 - `POST /api/parks` - Create park (admin only)
 - `GET /api/parks/[id]` - Get single park
@@ -178,6 +186,7 @@ src/
 - `DELETE /api/parks/[id]` - Delete park (admin only)
 
 ### Facilities
+
 - `GET /api/facilities` - List all facilities
 - `POST /api/facilities` - Create facility (admin only)
 - `GET /api/facilities/[id]` - Get single facility
@@ -185,6 +194,7 @@ src/
 - `DELETE /api/facilities/[id]` - Delete facility (admin only)
 
 ### Upload
+
 - `POST /api/upload` - Upload photo (admin only)
 
 ## Development
@@ -207,13 +217,13 @@ Edit the `facilityTypeEnum` in `src/lib/server/db/schema.ts`:
 
 ```ts
 export const facilityTypeEnum = pgEnum('FacilityType', [
-  'SPORTS_PLAYGROUND',
-  'CHILD_PLAYGROUND',
-  'NTO',
-  'TOILET',
-  'CHILL',
-  'CHILDREN_ROOM',
-  'YOUR_NEW_TYPE', // Add here
+	'SPORTS_PLAYGROUND',
+	'CHILD_PLAYGROUND',
+	'NTO',
+	'TOILET',
+	'CHILL',
+	'CHILDREN_ROOM',
+	'YOUR_NEW_TYPE' // Add here
 ]);
 ```
 
@@ -221,8 +231,8 @@ Then update the icons in `src/lib/components/Map.svelte`:
 
 ```ts
 const facilityIcons = {
-  // ...existing icons
-  YOUR_NEW_TYPE: '🎯',
+	// ...existing icons
+	YOUR_NEW_TYPE: '🎯'
 };
 ```
 
