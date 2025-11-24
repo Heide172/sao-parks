@@ -375,10 +375,21 @@
 				// Find the park this facility belongs to
 				const park = parks.find((p) => p.id === facility.parkId);
 
+				// Format contract term if exists (format: "[YYYY-MM-DD,YYYY-MM-DD)")
+				let formattedContractTerm = '';
+				if (facility.contractTerm) {
+					const match = facility.contractTerm.match(/\[(\d{4}-\d{2}-\d{2}),(\d{4}-\d{2}-\d{2})\)/);
+					if (match) {
+						const startDate = new Date(match[1]).toLocaleDateString('ru-RU');
+						const endDate = new Date(match[2]).toLocaleDateString('ru-RU');
+						formattedContractTerm = `от ${startDate} до ${endDate}`;
+					}
+				}
+
 				// Create popup content
 				let popupContent = `
 					<div class="facility-popup" onclick="event.target === event.currentTarget && this.closest('.leaflet-popup').querySelector('.leaflet-popup-close-button').click()">
-						${facility.photo ? `<img src="${facility.photo}" alt="${facility.name}" class="popup-image" style="max-width: 100%; border-radius: 4px 4px 0 0; margin: -1rem -1rem 0.5rem -1rem; display: block;" />` : ''}
+						${facility.photo ? `<img src="${facility.photo}" alt="${facility.name}" class="popup-image" style="width: 100%; height: auto; object-fit: contain; border-radius: 4px 4px 0 0; margin: -1rem -1rem 0.5rem -1rem; display: block;" />` : ''}
 						<h3 onclick="this.closest('.leaflet-popup').querySelector('.leaflet-popup-close-button').click()" style="cursor: pointer;">${facility.name}</h3>
 <h5>${facility.latitude.toFixed(6)}, ${facility.longitude.toFixed(6)}</h5>
 						<p><strong>Тип:</strong> ${FACILITY_TYPES[facility.type as keyof typeof FACILITY_TYPES] || facility.type}</p>
@@ -386,7 +397,7 @@
 						${facility.description ? `<p><strong>Описание:</strong> ${facility.description}</p>` : ''}
 						${facility.contractAction ? `<p><strong>Специализация:</strong> ${facility.contractAction}</p>` : ''}
 						${facility.contractWith ? `<p><strong>C кем контракт:</strong> ${facility.contractWith}</p>` : ''}
-						${facility.contractTerm ? `<p><strong>Cрок контракта:</strong> ${facility.contractTerm}</p>` : ''}
+						${formattedContractTerm ? `<p><strong>Cрок контракта:</strong> ${formattedContractTerm}</p>` : ''}
 						${
 							isAdmin
 								? `
