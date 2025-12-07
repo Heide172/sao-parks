@@ -718,7 +718,14 @@
 							<input
 								type="checkbox"
 								checked={selectedFacilityTypes.has(type)}
-								oninput={() => toggleFacilityType(type)}
+								onchange={(e) => {
+									const target = e.target as HTMLInputElement;
+									if (target.checked) {
+										selectedFacilityTypes.add(type);
+									} else {
+										selectedFacilityTypes.delete(type);
+									}
+								}}
 							/>
 							{FACILITY_ICONS[type as keyof typeof FACILITY_ICONS]}
 							{label}
@@ -742,7 +749,14 @@
 							<input
 								type="checkbox"
 								checked={selectedDistricts.has(district.id)}
-								oninput={() => toggleDistrict(district.id)}
+								onchange={(e) => {
+									const target = e.target as HTMLInputElement;
+									if (target.checked) {
+										selectedDistricts.add(district.id);
+									} else {
+										selectedDistricts.delete(district.id);
+									}
+								}}
 							/>
 							{district.name}
 						</label>
@@ -765,7 +779,14 @@
 							<input
 								type="checkbox"
 								checked={selectedParks.has(park.id)}
-								oninput={() => togglePark(park.id)}
+								onchange={(e) => {
+									const target = e.target as HTMLInputElement;
+									if (target.checked) {
+										selectedParks.add(park.id);
+									} else {
+										selectedParks.delete(park.id);
+									}
+								}}
 							/>
 							{park.name}
 						</label>
