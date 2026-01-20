@@ -15,7 +15,7 @@ export function createSession(cookies: Cookies): void {
 	cookies.set(SESSION_COOKIE_NAME, sessionToken, {
 		path: '/',
 		httpOnly: true,
-		secure: true,
+		secure: false,
 		sameSite: 'lax',
 		maxAge: SESSION_MAX_AGE
 	});

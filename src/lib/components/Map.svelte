@@ -425,7 +425,7 @@
 						${park ? `<p><strong>Парк:</strong> ${park.name}</p>` : ''}
 						<p><strong>Тип:</strong> ${FACILITY_TYPES[facility.type as keyof typeof FACILITY_TYPES] || facility.type}</p>
 						${facility.description ? `<p><strong>Описание:</strong> ${facility.description}</p>` : ''}
-						${facility.area && typeof facility.area === 'number' ? `<p><strong>Площадь:</strong> ${formatNumber(facility.area)} м²</p>` : ''}
+						${facility.area && true ? `<p><strong>Площадь:</strong> ${formatNumber(facility.area)} м²</p>` : ''}
 						${facility.surfaceType ? `<p><strong>Тип покрытия:</strong> ${facility.surfaceType}</p>` : ''}
 						${facility.mafCount ? `<p><strong>Количество МАФ:</strong> ${facility.mafCount}</p>` : ''}
 						${facility.contractAction ? `<p><strong>Специализация:</strong> ${facility.contractAction}</p>` : ''}
