@@ -7,7 +7,6 @@ import {
 	integer,
 	pgEnum,
 	index,
-	serial,
 	customType
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
@@ -31,7 +30,7 @@ export const facilityTypeEnum = pgEnum('FacilityType', [
 
 // Tables
 export const districts = pgTable('districts', {
-	id: serial('id').primaryKey(),
+	id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
 	name: text('name').unique(),
 	geometry: json('geometry'),
 	area: doublePrecision('area'),
@@ -42,7 +41,7 @@ export const districts = pgTable('districts', {
 export const parks = pgTable(
 	'parks',
 	{
-		id: serial('id').primaryKey(),
+		id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
 		name: text('name'),
 		description: text('description'),
 		geometry: json('geometry'),
@@ -60,7 +59,7 @@ export const parks = pgTable(
 export const facilities = pgTable(
 	'facilities',
 	{
-		id: serial('id').primaryKey(),
+		id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
 		externalId: text('external_id'),
 		name: text('name'),
 		type: facilityTypeEnum('type'),
@@ -68,7 +67,7 @@ export const facilities = pgTable(
 		longitude: doublePrecision('longitude'),
 		photo: text('photo'),
 		description: text('description'),
-		area: text('area'),
+		area: doublePrecision('area'),
 		mafCount: integer('maf_count'),
 		typeCoverage: text('type_coverage'),
 		contractAction: text('contract_action'),
