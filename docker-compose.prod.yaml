@@ -1,0 +1,11 @@
+services:
+  app:
+    image: ghcr.io/Heide172/sao-parks:latest
+    container_name: sao-parks-app
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      # Переменные для MinIO будут проброшены из .env
