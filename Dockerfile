@@ -2,6 +2,10 @@ FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
+# Принимаем DATABASE_URL как build argument
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
 # Копируем файлы зависимостей
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
@@ -12,7 +16,7 @@ COPY . .
 # ВАЖНО: сгенерировать .svelte-kit (tsconfig и т.п.) перед build
 RUN bun run prepare
 
-# Собираем проект
+# Собираем проект (DATABASE_URL уже установлен через ARG)
 RUN bun run build
 
 FROM oven/bun:1-slim AS runner
