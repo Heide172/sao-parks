@@ -55,6 +55,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug - Check secrets
+        run: |
+          echo "Checking if secrets are set..."
+          if [ -z "${{ secrets.SERVER_HOST }}" ]; then echo "❌ SERVER_HOST is not set"; exit 1; fi
+          if [ -z "${{ secrets.SERVER_USER }}" ]; then echo "❌ SERVER_USER is not set"; exit 1; fi
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then echo "❌ SSH_PRIVATE_KEY is not set"; exit 1; fi
+          if [ -z "${{ secrets.DEPLOY_PATH }}" ]; then echo "❌ DEPLOY_PATH is not set"; exit 1; fi
+          echo "✅ All required secrets are set"
+
       - name: Copy docker-compose to server
         uses: appleboy/scp-action@v0.1.7
         with:
