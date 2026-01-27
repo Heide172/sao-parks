@@ -9,8 +9,10 @@ RUN bun install --frozen-lockfile
 # Копируем остальной код
 COPY . .
 
-# Устанавливаем адаптер node (если еще не установлен) и собираем проект
-# Важно: убедитесь, что в svelte.config.js используется @sveltejs/adapter-node
+# ВАЖНО: сгенерировать .svelte-kit (tsconfig и т.п.) перед build
+RUN bun run prepare
+
+# Собираем проект
 RUN bun run build
 
 FROM oven/bun:1-slim AS runner
